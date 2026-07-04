@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>_-_! · Admin</title>
+    <link href="https://fonts.bunny.net/css?family=lexend:300,400,600,700" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Lexend', 'Segoe UI', Arial, sans-serif;
+            background: #0a0e1a;
+            color: #e8edf5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #1a2642;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .header h1 {
+            font-weight: 300;
+            font-size: 1.6rem;
+            letter-spacing: 4px;
+            color: #6b9fff;
+        }
+
+        .header .back {
+            color: #4a5a7a;
+            text-decoration: none;
+            font-size: 0.8rem;
+            transition: color 0.2s;
+        }
+
+        .header .back:hover {
+            color: #6b9fff;
+        }
+
+        .login-box {
+            max-width: 400px;
+            margin: 60px auto;
+            background: #131b2e;
+            border: 1px solid #1e2a44;
+            border-radius: 16px;
+            padding: 30px 28px;
+        }
+
+        .login-box input {
+            width: 100%;
+            font-family: 'Lexend', sans-serif;
+            background: #0a0e1a;
+            border: 1px solid #1e2a44;
+            border-radius: 10px;
+            padding: 12px 14px;
+            color: #e8edf5;
+            font-size: 0.9rem;
+            outline: none;
+            min-height: 44px;
+            margin-bottom: 12px;
+        }
+
+        .login-box input:focus {
+            border-color: #6b9fff;
+        }
+
+        .login-box input::placeholder {
+            color: #3a4a5a;
+        }
+
+        .login-box button {
+            width: 100%;
+            font-family: 'Lexend', sans-serif;
+            background: #6b9fff;
+            color: #0a0e1a;
+            border: none;
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            min-height: 44px;
+        }
+
+        .login-box button:hover {
+            background: #5a8aee;
+        }
+
+        .login-error {
+            color: #ff6b6b;
+            font-size: 0.8rem;
+            margin-bottom: 12px;
+            min-height: 20px;
+        }
+
+        .logout-btn {
+            background: rgba(107, 159, 255, 0.1);
+            border: 1px solid #1a2642;
+            color: #6a7a9a;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-family: 'Lexend', sans-serif;
+            font-size: 0.7rem;
+            cursor: pointer;
+        }
+
+        .logout-btn:hover {
+            background: rgba(107, 159, 255, 0.2);
+        }
+
+        .stats {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-box {
+            background: #131b2e;
+            border: 1px solid #1e2a44;
+            border-radius: 12px;
+            padding: 14px 20px;
+            flex: 1;
+            min-width: 100px;
+        }
+
+        .stat-box .number {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #6b9fff;
+        }
+
+        .stat-box .label {
+            font-size: 0.7rem;
+            color: #4a5a7a;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            background: #131b2e;
+            border: 1px solid #1e2a44;
+            border-radius: 12px;
+            padding: 0;
+            margin-top: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+
+        th {
+            text-align: left;
+            padding: 10px 12px;
+            color: #4a5a7a;
+            font-weight: 400;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid #1e2a44;
+            position: sticky;
+            top: 0;
+            background: #131b2e;
+            z-index: 1;
+        }
+
+        td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #0d1526;
+            word-bre
