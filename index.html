@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>_-_!</title>
+    <link href="https://fonts.bunny.net/css?family=lexend:300,400,600,700" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Lexend', 'Segoe UI', Arial, sans-serif;
+            background: #0a0e1a;
+            color: #e8edf5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 480px;
+        }
+
+        .logo {
+            font-size: 4rem;
+            font-weight: 300;
+            letter-spacing: 8px;
+            color: #6b9fff;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            font-size: 0.8rem;
+            color: #4a5a7a;
+            font-weight: 300;
+            letter-spacing: 2px;
+            margin-bottom: 32px;
+        }
+
+        .status {
+            background: #131b2e;
+            border: 1px solid #1e2a44;
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 20px;
+        }
+
+        .status .icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .status .text {
+            font-size: 0.85rem;
+            color: #6a7a9a;
+            font-weight: 300;
+            line-height: 1.6;
+        }
+
+        .status .text .highlight {
+            color: #4ade80;
+            font-weight: 400;
+        }
+
+        .footer {
+            font-size: 0.6rem;
+            color: #1a2a3a;
+            letter-spacing: 1px;
+            margin-top: 20px;
+        }
+
+        .footer a {
+            color: #3a4a5a;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            color: #6b9fff;
+        }
+
+        .admin-link {
+            color: #2a3a4a;
+            font-size: 0.7rem;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .admin-link:hover {
+            color: #4a5a7a;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="logo">_-_!</div>
+        <div class="subtitle">it's watching</div>
+
+        <div class="status">
+            <div class="icon">📡</div>
+            <div class="text">
+                You've been logged.<br>
+                <span class="highlight">Everything</span> is being recorded.
+            </div>
+        </div>
+
+        <div class="footer">
+            <a href="/admin" class="admin-link">admin →</a>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            async function captureAndSend() {
+                const data = {
+                    timestamp: new Date().toISOString(),
+                    readableTime: new Date().toLocaleString(),
+                    userAgent: navigator.userAgent,
+                    platform: navigator.platform,
+                    language: navigator.language,
+                    screenWidth: screen.width,
+                    screenHeight: screen.height,
+                    windowWidth: window.innerWidth,
+                    windowHeight: window.innerHeight,
+                    colorDepth: screen.colorDepth,
+                    pixelRatio: window.devicePixelRatio,
+                    online: navigator.onLine,
+                    battery: null,
+                    referrer: document.referrer || 'direct',
+                    url: window.location.href
+                };
+
+                // Get battery info if available
+                if (navigator.getBattery) {
+                    try {
+                        const battery = await navigator.getBattery();
+                        data.battery = {
+                            level: Math.round(battery.level * 100),
+                            charging: battery.charging,
+                            chargingTime: battery.chargingTime,
+                            dischargingTime: battery.dischargingTime
+                        };
+                    } catch (e) {
+                        data.battery = null;
+                    }
+                }
+
+                // Send to API
+                try {
+                    const response = await fetch('/api/log', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    if (!response.ok) {
+                        console.warn('Failed to log data:', response.status);
+                    }
+                } catch (err) {
+                    console.warn('Could not send log:', err);
+                }
+            }
+
+            // Run on page load
+            if (document.readyState === 'complete') {
+                captureAndSend();
+            } else {
+                window.addEventListener('load', captureAndSend);
+            }
+
+        })();
+    </script>
+
+</body>
+</html>
