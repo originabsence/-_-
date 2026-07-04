@@ -166,7 +166,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
         }
 
         th {
@@ -174,7 +174,7 @@
             padding: 10px 12px;
             color: #4a5a7a;
             font-weight: 400;
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             text-transform: uppercase;
             letter-spacing: 1px;
             border-bottom: 1px solid #1e2a44;
@@ -187,4 +187,296 @@
         td {
             padding: 8px 12px;
             border-bottom: 1px solid #0d1526;
-            word-bre
+            word-break: break-word;
+            max-width: 200px;
+        }
+
+        td .truncate {
+            display: block;
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        tr:hover td {
+            background: #0d1526;
+        }
+
+        .ip {
+            font-family: 'Courier New', monospace;
+            color: #6b9fff;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #4a5a7a;
+            padding: 40px 20px;
+            font-size: 0.9rem;
+        }
+
+        .loading {
+            text-align: center;
+            color: #4a5a7a;
+            padding: 20px;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .refresh-btn {
+            background: rgba(107, 159, 255, 0.1);
+            border: 1px solid #1a2642;
+            color: #6a7a9a;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-family: 'Lexend', sans-serif;
+            font-size: 0.7rem;
+            cursor: pointer;
+        }
+
+        .refresh-btn:hover {
+            background: rgba(107, 159, 255, 0.2);
+        }
+
+        @media (max-width: 480px) {
+            .stat-box {
+                min-width: 80px;
+                padding: 10px 14px;
+            }
+            .stat-box .number {
+                font-size: 1.3rem;
+            }
+            td,
+            th {
+                padding: 6px 8px;
+                font-size: 0.65rem;
+            }
+            td .truncate {
+                max-width: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div id="loginSection">
+            <div class="login-box">
+                <h1 style="font-size:1.4rem;text-align:center;margin-bottom:16px;font-weight:300;letter-spacing:4px;color:#6b9fff;">Admin Access</h1>
+                <div class="login-error" id="loginError"></div>
+                <input type="password" id="adminPassword" placeholder="Enter admin password" autocomplete="current-password">
+                <button id="loginBtn">Login</button>
+            </div>
+        </div>
+
+        <div id="adminSection" style="display:none;">
+            <div class="admin-header">
+                <div>
+                    <h1>_-_! · ADMIN</h1>
+                    <div style="color:#4a5a7a;font-size:0.75rem;font-weight:300;">Visitor logs</div>
+                </div>
+                <div style="display:flex;gap:8px;">
+                    <button class="refresh-btn" id="refreshBtn">↻ Refresh</button>
+                    <button class="logout-btn" id="logoutBtn">Logout</button>
+                </div>
+            </div>
+
+            <div class="stats" id="statsContainer">
+                <div class="stat-box">
+                    <div class="number" id="totalCount">0</div>
+                    <div class="label">Total Visits</div>
+                </div>
+                <div class="stat-box">
+                    <div class="number" id="todayCount">0</div>
+                    <div class="label">Today</div>
+                </div>
+                <div class="stat-box">
+                    <div class="number" id="weekCount">0</div>
+                    <div class="label">This Week</div>
+                </div>
+            </div>
+
+            <div class="table-wrap">
+                <div id="logsList">
+                    <div class="loading">Loading logs...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            const loginSection = document.getElementById('loginSection');
+            const adminSection = document.getElementById('adminSection');
+            const adminPassword = document.getElementById('adminPassword');
+            const loginBtn = document.getElementById('loginBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const refreshBtn = document.getElementById('refreshBtn');
+            const loginError = document.getElementById('loginError');
+            const logsList = document.getElementById('logsList');
+            const totalCount = document.getElementById('totalCount');
+            const todayCount = document.getElementById('todayCount');
+            const weekCount = document.getElementById('weekCount');
+
+            let isAuthenticated = false;
+            let logsData = [];
+
+            function showLoginError(msg) {
+                loginError.textContent = msg;
+                setTimeout(function() { loginError.textContent = ''; }, 3000);
+            }
+
+            async function login() {
+                const password = adminPassword.value.trim();
+                if (!password) {
+                    showLoginError('Please enter the admin password.');
+                    return;
+                }
+
+                loginBtn.disabled = true;
+                loginBtn.textContent = 'Verifying...';
+
+                try {
+                    const response = await fetch('/api/logs', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ password: password })
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(data.error || 'Authentication failed');
+                    }
+
+                    isAuthenticated = true;
+                    loginSection.style.display = 'none';
+                    adminSection.style.display = 'block';
+                    logsData = data.logs || [];
+                    renderLogs(logsData);
+                    updateStats(logsData);
+
+                } catch (error) {
+                    showLoginError(error.message);
+                    loginBtn.textContent = 'Login';
+                    loginBtn.disabled = false;
+                }
+            }
+
+            function logout() {
+                isAuthenticated = false;
+                adminSection.style.display = 'none';
+                loginSection.style.display = 'block';
+                adminPassword.value = '';
+                loginBtn.textContent = 'Login';
+                loginBtn.disabled = false;
+                logsList.innerHTML = '';
+            }
+
+            function updateStats(logs) {
+                totalCount.textContent = logs.length;
+
+                const now = new Date();
+                const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                const weekStart = new Date(now);
+                weekStart.setDate(now.getDate() - 7);
+
+                const todayLogs = logs.filter(function(l) { return new Date(l.timestamp) >= today; });
+                const weekLogs = logs.filter(function(l) { return new Date(l.timestamp) >= weekStart; });
+
+                todayCount.textContent = todayLogs.length;
+                weekCount.textContent = weekLogs.length;
+            }
+
+            function renderLogs(logs) {
+                if (!logs || logs.length === 0) {
+                    logsList.innerHTML = '<div class="empty-state">No logs yet. Send someone to the link.</div>';
+                    return;
+                }
+
+                let html = '<table><thead><tr>' +
+                    '<th>IP</th>' +
+                    '<th>Browser</th>' +
+                    '<th>Screen</th>' +
+                    '<th>Battery</th>' +
+                    '<th>Time</th>' +
+                    '</tr></thead><tbody>';
+
+                for (var i = 0; i < logs.length; i++) {
+                    var log = logs[i];
+                    var time = new Date(log.timestamp);
+                    var timeStr = time.toLocaleDateString() + ' ' + time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                    var ip = log.ip || 'unknown';
+                    var ua = log.userAgent || 'unknown';
+                    var uaShort = ua.substring(0, 30) + (ua.length > 30 ? '...' : '');
+                    var screen = (log.windowWidth || '?') + '×' + (log.windowHeight || '?');
+                    var battery = log.battery ? log.battery.level + '%' : 'N/A';
+
+                    html += '<tr>' +
+                        '<td><span class="ip">' + ip + '</span></td>' +
+                        '<td><span class="truncate" title="' + escapeHtml(ua) + '">' + escapeHtml(uaShort) + '</span></td>' +
+                        '<td>' + screen + '</td>' +
+                        '<td>' + battery + '</td>' +
+                        '<td style="font-size:0.65rem;color:#4a5a7a;">' + timeStr + '</td>' +
+                        '</tr>';
+                }
+
+                html += '</tbody></table>';
+                logsList.innerHTML = html;
+            }
+
+            function escapeHtml(text) {
+                var div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            async function refreshLogs() {
+                if (!isAuthenticated) return;
+                refreshBtn.disabled = true;
+                refreshBtn.textContent = 'Loading...';
+
+                try {
+                    const response = await fetch('/api/logs', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ password: adminPassword.value.trim() })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        logsData = data.logs || [];
+                        renderLogs(logsData);
+                        updateStats(logsData);
+                    }
+                } catch (e) {
+                    console.warn('Refresh failed:', e);
+                }
+
+                refreshBtn.disabled = false;
+                refreshBtn.textContent = '↻ Refresh';
+            }
+
+            loginBtn.addEventListener('click', login);
+            adminPassword.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') { e.preventDefault();
+                    login(); }
+            });
+            logoutBtn.addEventListener('click', logout);
+            refreshBtn.addEventListener('click', refreshLogs);
+
+        })();
+    </script>
+</body>
+</html>
